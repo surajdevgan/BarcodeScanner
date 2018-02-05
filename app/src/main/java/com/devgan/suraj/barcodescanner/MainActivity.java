@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         scan = (findViewById(R.id.scan));
-        img = (findViewById(R.id.imgview));
         txtresult = (findViewById(R.id.txtResult));
         scan.setVisibility(View.GONE);
 
@@ -42,17 +41,37 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void btnScan(View view) {
+
+           // Setuping up BarocdeDetector
+
         BarcodeDetector detector = new BarcodeDetector.Builder(getApplicationContext())
                 .setBarcodeFormats(Barcode.ALL_FORMATS)
                 .build();
-        Frame frame = new Frame.Builder()
-                .setBitmap(mbitmap).build();
-        SparseArray<Barcode> barcodeSparseArray = detector.detect(frame);
-        Barcode result = barcodeSparseArray.valueAt(0);
-        txtresult.setText(result.rawValue);
 
 
-    }
+            try {
+                // This is for Detecting the BarCode
+                Frame frame = new Frame.Builder()
+                        .setBitmap(mbitmap).build();
+                SparseArray<Barcode> barcodeSparseArray = detector.detect(frame);
+
+            // This is for Decoding the BarCode
+                Barcode result = barcodeSparseArray.valueAt(0);
+                txtresult.setText(result.rawValue);
+
+            }
+            catch (Exception e)
+            {
+                txtresult.setText("Error Please select proper Qr Code");
+            }
+
+
+
+        }
+
+
+
+
 
     public void camera(View view) {
         startActivity(new Intent(this,CameraActivity.class));
@@ -76,10 +95,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==PICK_IMAGE)
+        if(requestCode==PICK_IMAGE && resultCode == RESULT_OK)
         {
             uri = data.getData();
             try {
+                img = (findViewById(R.id.imgview));
                 mbitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
                 img.setImageBitmap(mbitmap);
                 scan.setVisibility(View.VISIBLE);
